@@ -23,7 +23,6 @@ var (
 	productHandler v1.ProductHandler      = v1.NewProductHandler(productService, jwtService)
 )
 
-//test
 func main() {
 	defer config.CloseDatabaseConnection(db)
 	server := gin.Default()
