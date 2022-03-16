@@ -3,16 +3,19 @@ package service
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/ydhnwb/golang_heroku/repo"
 )
 
 //JWTService is a contract of what jwtService can do
 type JWTService interface {
 	GenerateToken(userID string) string
 	ValidateToken(token string, ctx *gin.Context) *jwt.Token
+	ExtractUser(token string, userRepo repo.UserRepository) interface{}
 }
 
 type jwtCustomClaim struct {
@@ -72,4 +75,17 @@ func (j *jwtService) ValidateToken(token string, ctx *gin.Context) *jwt.Token {
 
 	return t
 
+}
+
+func (j *jwtService) ExtractUser(token string, userRepo repo.UserRepository) interface{} {
+	t := j.ValidateToken(token, &gin.Context{})
+
+	if t == nil {
+		return nil
+	}
+
+	fUserID := t.Claims.(jwt.MapClaims)["user_id"].(float64)
+	userID := strconv.FormatFloat(fUserID, 'E', -1, 64)
+	user, _ := userRepo.FindByUserID(userID)
+	return user
 }
